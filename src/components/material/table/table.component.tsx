@@ -1,7 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
 import clsx from "clsx";
-import { lighten, makeStyles } from "@material-ui/core/styles";
 import Table from "@material-ui/core/Table";
 import TableBody from "@material-ui/core/TableBody";
 import TableCell from "@material-ui/core/TableCell";
@@ -13,38 +12,16 @@ import TableSortLabel from "@material-ui/core/TableSortLabel";
 import Toolbar from "@material-ui/core/Toolbar";
 import Typography from "@material-ui/core/Typography";
 import Paper from "@material-ui/core/Paper";
-import Checkbox from "@material-ui/core/Checkbox";
-import IconButton from "@material-ui/core/IconButton";
-import Tooltip from "@material-ui/core/Tooltip";
-import FormControlLabel from "@material-ui/core/FormControlLabel";
-import Switch from "@material-ui/core/Switch";
-import DeleteIcon from "@material-ui/icons/Delete";
-import FilterListIcon from "@material-ui/icons/FilterList";
-import { MaterialTable } from "../../../models";
-
-function descendingComparator(a: any, b: any, orderBy: any) {
-	if (b[orderBy] < a[orderBy]) {
-		return -1;
-	}
-	if (b[orderBy] > a[orderBy]) {
-		return 1;
-	}
-	return 0;
-}
-
-function getComparator(order: string, orderBy: any) {
-	return order === "desc" ? (a: any, b: any) => descendingComparator(a, b, orderBy) : (a: any, b: any) => -descendingComparator(a, b, orderBy);
-}
-
-function stableSort(array: any, comparator: any) {
-	const stabilizedThis = array.map((el: any, index: any) => [el, index]);
-	stabilizedThis.sort((a: any, b: any) => {
-		const order = comparator(a[0], b[0]);
-		if (order !== 0) return order;
-		return a[1] - b[1];
-	});
-	return stabilizedThis.map((el: any) => el[0]);
-}
+import { descendingComparator, getComparator, stableSort, useStyles, useToolbarStyles } from "../helper/table.helper";
+// import { lighten, makeStyles } from "@material-ui/core/styles";
+// import IconButton from "@material-ui/core/IconButton";
+// import Tooltip from "@material-ui/core/Tooltip";
+// import FilterListIcon from "@material-ui/icons/FilterList";
+// import DeleteIcon from "@material-ui/icons/Delete";
+// import { MaterialTable } from "../../../models";
+// import Switch from "@material-ui/core/Switch";
+// import FormControlLabel from "@material-ui/core/FormControlLabel";
+// import Checkbox from "@material-ui/core/Checkbox";
 
 function EnhancedTableHead(props: any) {
 	const { classes, order, orderBy, onRequestSort, headCells } = props;
@@ -84,59 +61,16 @@ EnhancedTableHead.propTypes = {
 	headCells: PropTypes.array.isRequired
 };
 
-const useToolbarStyles = makeStyles((theme) => ({
-	root: {
-		paddingLeft: theme.spacing(2),
-		paddingRight: theme.spacing(1)
-	},
-	highlight:
-		theme.palette.type === "light"
-			? {
-					color: theme.palette.secondary.main,
-					backgroundColor: lighten(theme.palette.secondary.light, 0.85)
-			  }
-			: {
-					color: theme.palette.text.primary,
-					backgroundColor: theme.palette.secondary.dark
-			  },
-	title: {
-		flex: "1 1 100%"
-	}
-}));
-
 const EnhancedTableToolbar = (props: any) => {
 	const classes = useToolbarStyles();
-	const { numSelected } = props;
 
 	return (
-		<Toolbar
-			className={clsx(classes.root, {
-				[classes.highlight]: numSelected > 0
-			})}
-		>
-			{numSelected > 0 ? (
-				<Typography className={classes.title} color="inherit" variant="subtitle1" component="div">
-					{numSelected} selected
-				</Typography>
-			) : (
+		<Toolbar className={clsx(classes.root)}>
+			{
 				<Typography className={classes.title} variant="h6" id="tableTitle" component="div">
-					Nutrition
+					Users
 				</Typography>
-			)}
-
-			{numSelected > 0 ? (
-				<Tooltip title="Delete">
-					<IconButton aria-label="delete">
-						<DeleteIcon />
-					</IconButton>
-				</Tooltip>
-			) : (
-				<Tooltip title="Filter list">
-					<IconButton aria-label="filter list">
-						<FilterListIcon />
-					</IconButton>
-				</Tooltip>
-			)}
+			}
 		</Toolbar>
 	);
 };
@@ -144,30 +78,6 @@ const EnhancedTableToolbar = (props: any) => {
 EnhancedTableToolbar.propTypes = {
 	numSelected: PropTypes.number.isRequired
 };
-
-const useStyles = makeStyles((theme) => ({
-	root: {
-		width: "100%"
-	},
-	paper: {
-		width: "100%",
-		marginBottom: theme.spacing(2)
-	},
-	table: {
-		minWidth: 750
-	},
-	visuallyHidden: {
-		border: 0,
-		clip: "rect(0 0 0 0)",
-		height: 1,
-		margin: -1,
-		overflow: "hidden",
-		padding: 0,
-		position: "absolute",
-		top: 20,
-		width: 1
-	}
-}));
 
 const EnhancedTable = (props: any) => {
 	const { headCells, rowFromProps } = props;
@@ -249,7 +159,7 @@ const EnhancedTable = (props: any) => {
 								.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
 								.map((row: any, index: any) => {
 									const isItemSelected = isSelected(row.id);
-									const labelId = `enhanced-table-checkbox-${index}`;
+									// const labelId = `enhanced-table-checkbox-${index}`;
 									const mappedRow = returnRowInDetail(row);
 									return (
 										<TableRow
