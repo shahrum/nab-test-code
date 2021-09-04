@@ -4,43 +4,63 @@ import { MaterialTable, User } from "../models";
 import axios from "../api/axios";
 import CircularIndeterminate from "../components/material/spinner/spinner.component";
 const headCells: MaterialTable.HeadCells[] = [
-	{ id: "id", numeric: false, disablePadding: true, label: "ID" },
+	{ id: "id", numeric: false, disablePadding: false, label: "ID" },
 	{ id: "email", numeric: false, disablePadding: false, label: "EMAIL" },
 	{ id: "first_name", numeric: false, disablePadding: false, label: "FIRSTNAME" },
 	{ id: "last_name", numeric: false, disablePadding: false, label: "LASTNAME" }
 ];
 const HomePage = () => {
 	const [user, setUser] = useState<User>();
+	const [rowPerPageOnApi, setRowPerPageOnApi] = useState(5);
+	const [pageNumber, setPageNumber] = useState(1);
 	const [paginationInfo, setPaginationInfo] = useState<MaterialTable.PaginationInfo>();
 	useEffect(() => {
+		const getUsers = (): void => {
+			setUser(undefined);
+			axios
+				.get(`/api/users?page=${pageNumber}&per_page=${rowPerPageOnApi}`)
+				.then((axiosResponse) => {
+					const {
+						data: { data, page, per_page, total, total_pages }
+					} = axiosResponse;
+					const mappedUserData = data.map((userData: any) => {
+						const { avatar, ...rest } = userData;
+						return rest;
+					});
+					setPaginationInfo({ page, perPage: per_page, total, totalPages: total_pages });
+					setUser(mappedUserData);
+				})
+				.catch((error) =>
+					console.error(
+						"API error, we could also log our error however its better to log them in the axios base config and handle it with an interceptor",
+						error
+					)
+				);
+		};
+		console.log("row per page effect:", rowPerPageOnApi);
 		getUsers();
-	}, []);
+	}, [rowPerPageOnApi, pageNumber]);
 
-	const rowPerPageChanged = (row: number) => {
+	const onRowPerPageChanged = (row: number): void => {
 		console.log("row", row);
-		getUsers(row);
+		setPageNumber(1);
+		setRowPerPageOnApi(row);
 	};
 
-	const getUsers = (rowPerPage = 5) => {
-		axios
-			.get(`/api/users?page=0&per_page=${rowPerPage}`)
-			.then((axiosResponse) => {
-				console.log("🚀 ~ file: Home.page.tsx ~ line 28 ~ .then ~ axiosResponse", axiosResponse);
-				const {
-					data: { data, page, per_page, total, total_pages }
-				} = axiosResponse;
-				console.log("response", data);
-				const mappedUserData = data.map((userData: any) => {
-					const { avatar, ...rest } = userData;
-					return rest;
-				});
-				setUser(mappedUserData);
-				setPaginationInfo({ page, perPage: per_page, total, totalPages: total_pages });
-			})
-			.catch((error) => console.error("API error", error));
+	const pageNumberChanged = (pNumber: number): void => {
+		console.log("pageNumberChanged", pNumber);
+		setPageNumber(pageNumber + pNumber);
 	};
+
 	return user ? (
-		<EnhancedTable title="Users" headCells={headCells} rowFromProps={user} rowPerPageChanged={rowPerPageChanged} paginationInfo={paginationInfo} />
+		<EnhancedTable
+			title="Users"
+			rowFromProps={user}
+			headCells={headCells}
+			paginationInfo={paginationInfo}
+			rowPerPageChanged={onRowPerPageChanged}
+			pageNumberChanged={pageNumberChanged}
+		/>
 	) : (
 		<CircularIndeterminate />
 	);

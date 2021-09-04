@@ -1,30 +1,19 @@
 import React from "react";
 import PropTypes from "prop-types";
-import clsx from "clsx";
 import Table from "@material-ui/core/Table";
 import TableBody from "@material-ui/core/TableBody";
 import TableCell from "@material-ui/core/TableCell";
 import TableContainer from "@material-ui/core/TableContainer";
 import TableHead from "@material-ui/core/TableHead";
-import TablePagination from "@material-ui/core/TablePagination";
 import TableRow from "@material-ui/core/TableRow";
 import TableSortLabel from "@material-ui/core/TableSortLabel";
-import Toolbar from "@material-ui/core/Toolbar";
-import Typography from "@material-ui/core/Typography";
 import Paper from "@material-ui/core/Paper";
-import { descendingComparator, getComparator, stableSort, useStyles, useToolbarStyles } from "../helper/table.helper";
+import { getComparator, stableSort, useStyles } from "../helper/table.helper";
 import SimpleSelect from "../select/select.component";
 import { convertObjectKeysIntoArray, SORT_ORDER } from "../../../shared";
 import EnhancedTableToolbar from "./table-toolbar.component";
-// import { lighten, makeStyles } from "@material-ui/core/styles";
-// import IconButton from "@material-ui/core/IconButton";
-// import Tooltip from "@material-ui/core/Tooltip";
-// import FilterListIcon from "@material-ui/icons/FilterList";
-// import DeleteIcon from "@material-ui/icons/Delete";
-// import { MaterialTable } from "../../../models";
-// import Switch from "@material-ui/core/Switch";
-// import FormControlLabel from "@material-ui/core/FormControlLabel";
-// import Checkbox from "@material-ui/core/Checkbox";
+import ArrowBackIcon from "@material-ui/icons/ArrowBack";
+import ArrowForwardIcon from "@material-ui/icons/ArrowForward";
 
 function EnhancedTableHead(props: any) {
 	const { classes, order, orderBy, onRequestSort, headCells } = props;
@@ -65,9 +54,9 @@ EnhancedTableHead.propTypes = {
 };
 
 const EnhancedTable = (props: any) => {
-	const { title, headCells, rowFromProps, rowPerPageChanged, paginationInfo } = props;
+	const { title, headCells, rowFromProps, rowPerPageChanged, paginationInfo, pageNumberChanged } = props;
 	const defaultRowsPerPage = 5;
-	console.log("paginationInfo: ", paginationInfo);
+	// console.log("paginationInfo: ", paginationInfo);
 	const classes = useStyles();
 	const [order, setOrder] = React.useState(SORT_ORDER.asc);
 	const [orderBy, setOrderBy] = React.useState("calories");
@@ -112,7 +101,12 @@ const EnhancedTable = (props: any) => {
 	};
 
 	const isSelected: any = (name: any) => selected.indexOf(name) !== -1;
-
+	const previousPage = () => {
+		pageNumberChanged(-1);
+	};
+	const nextPage = () => {
+		pageNumberChanged(+1);
+	};
 	const returnRowInDetail = (row: any) => convertObjectKeysIntoArray(row);
 	return (
 		<div className={classes.root}>
@@ -158,7 +152,25 @@ const EnhancedTable = (props: any) => {
 						</TableBody>
 					</Table>
 				</TableContainer>
-				<SimpleSelect fieldName="Rows per page" selectOptions={[5, 10, 25]} defaultOption={5} width={150} onSelectValueChanged={rowPerPageChanged} />
+				<div className={classes.customFooter}>
+					{paginationInfo?.page > 1 ? (
+						<button className={classes.pagination} onClick={previousPage}>
+							<ArrowBackIcon />
+						</button>
+					) : null}
+					<SimpleSelect
+						fieldName="Rows per page"
+						selectOptions={[5, 10, 25]}
+						defaultOption={paginationInfo?.perPage}
+						width={150}
+						onSelectValueChanged={rowPerPageChanged}
+					/>
+					{paginationInfo?.page === paginationInfo?.totalPages ? null : (
+						<button className={classes.pagination} onClick={nextPage}>
+							<ArrowForwardIcon />
+						</button>
+					)}
+				</div>
 			</Paper>
 		</div>
 	);

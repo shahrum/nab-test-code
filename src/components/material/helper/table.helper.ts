@@ -21,6 +21,23 @@ export const useStyles = makeStyles((theme) => ({
 		position: "absolute",
 		top: 20,
 		width: 1
+	},
+	customFooter: {
+		display: "flex",
+		alignItems: "center",
+		justifyContent: "space-evenly"
+	},
+	pagination: {
+		cursor: "pointer",
+		borderRadius: "50%",
+		background: "#000",
+		color: "#fff",
+		padding: 5,
+		border: "none"
+	},
+	paginationDisabled: {
+		cursor: "not-allowed",
+		background: "#ccc"
 	}
 }));
 
