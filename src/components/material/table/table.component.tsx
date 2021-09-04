@@ -14,6 +14,8 @@ import Typography from "@material-ui/core/Typography";
 import Paper from "@material-ui/core/Paper";
 import { descendingComparator, getComparator, stableSort, useStyles, useToolbarStyles } from "../helper/table.helper";
 import SimpleSelect from "../select/select.component";
+import { convertObjectKeysIntoArray, SORT_ORDER } from "../../../shared";
+import EnhancedTableToolbar from "./table-toolbar.component";
 // import { lighten, makeStyles } from "@material-ui/core/styles";
 // import IconButton from "@material-ui/core/IconButton";
 // import Tooltip from "@material-ui/core/Tooltip";
@@ -62,36 +64,24 @@ EnhancedTableHead.propTypes = {
 	headCells: PropTypes.array.isRequired
 };
 
-const EnhancedTableToolbar = (props: any) => {
-	const classes = useToolbarStyles();
-
-	return (
-		<Toolbar className={clsx(classes.root)}>
-			{
-				<Typography className={classes.title} variant="h6" id="tableTitle" component="div">
-					Users
-				</Typography>
-			}
-		</Toolbar>
-	);
-};
-
-EnhancedTableToolbar.propTypes = {
-	numSelected: PropTypes.number.isRequired
-};
-
 const EnhancedTable = (props: any) => {
-	const { headCells, rowFromProps, rowPerPageChanged } = props;
+	const { title, headCells, rowFromProps, rowPerPageChanged, paginationInfo } = props;
+	const defaultRowsPerPage = 5;
+	console.log("paginationInfo: ", paginationInfo);
 	const classes = useStyles();
-	const [order, setOrder] = React.useState("asc");
+	const [order, setOrder] = React.useState(SORT_ORDER.asc);
 	const [orderBy, setOrderBy] = React.useState("calories");
 	const [selected, setSelected] = React.useState<any>([]);
 	const [page, setPage] = React.useState(0);
-	const [rowsPerPage, setRowsPerPage] = React.useState(5);
+	const [rowsPerPage, setRowsPerPage] = React.useState(defaultRowsPerPage);
+
+	React.useEffect(() => {
+		setRowsPerPage(paginationInfo?.perPage || defaultRowsPerPage);
+	}, [paginationInfo]);
 
 	const handleRequestSort = (event: any, property: any) => {
-		const isAsc = orderBy === property && order === "asc";
-		setOrder(isAsc ? "desc" : "asc");
+		const isAsc = orderBy === property && order === SORT_ORDER.asc;
+		setOrder(isAsc ? SORT_ORDER.desc : SORT_ORDER.asc);
 		setOrderBy(property);
 	};
 
@@ -121,28 +111,13 @@ const EnhancedTable = (props: any) => {
 		setSelected(newSelected);
 	};
 
-	const handleChangePage = (event: any, newPage: any) => {
-		setPage(newPage);
-	};
-
-	const handleChangeRowsPerPage = (event: any) => {
-		setRowsPerPage(parseInt(event.target.value, 10));
-		setPage(0);
-	};
-
 	const isSelected: any = (name: any) => selected.indexOf(name) !== -1;
 
-	const returnRowInDetail = (row: any) => {
-		const objectKeys = [];
-		for (let key in row) {
-			objectKeys.push(`${key}`);
-		}
-		return objectKeys;
-	};
+	const returnRowInDetail = (row: any) => convertObjectKeysIntoArray(row);
 	return (
 		<div className={classes.root}>
 			<Paper className={classes.paper}>
-				<EnhancedTableToolbar numSelected={selected.length} />
+				<EnhancedTableToolbar title={title} />
 				<TableContainer>
 					<Table className={classes.table} aria-labelledby="tableTitle" size="medium" aria-label="enhanced table">
 						<EnhancedTableHead
@@ -183,16 +158,7 @@ const EnhancedTable = (props: any) => {
 						</TableBody>
 					</Table>
 				</TableContainer>
-				<SimpleSelect fieldName="Rows per page" selectOptions={[5, 10, 15]} defaultOption={5} width={150} onSelectValueChanged={rowPerPageChanged} />
-				<TablePagination
-					rowsPerPageOptions={[5, 10, 25]}
-					component="div"
-					count={rowFromProps.length}
-					rowsPerPage={rowsPerPage}
-					page={page}
-					onPageChange={handleChangePage}
-					onRowsPerPageChange={handleChangeRowsPerPage}
-				/>
+				<SimpleSelect fieldName="Rows per page" selectOptions={[5, 10, 25]} defaultOption={5} width={150} onSelectValueChanged={rowPerPageChanged} />
 			</Paper>
 		</div>
 	);

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import EnhancedTable from "../components/material/table/table.component";
-import { MaterialTable } from "../models";
+import { MaterialTable, User } from "../models";
 import axios from "../api/axios";
 import CircularIndeterminate from "../components/material/spinner/spinner.component";
 const headCells: MaterialTable.HeadCells[] = [
@@ -10,7 +10,8 @@ const headCells: MaterialTable.HeadCells[] = [
 	{ id: "last_name", numeric: false, disablePadding: false, label: "LASTNAME" }
 ];
 const HomePage = () => {
-	const [user, setUser] = useState(null);
+	const [user, setUser] = useState<User>();
+	const [paginationInfo, setPaginationInfo] = useState<MaterialTable.PaginationInfo>();
 	useEffect(() => {
 		getUsers();
 	}, []);
@@ -24,8 +25,9 @@ const HomePage = () => {
 		axios
 			.get(`/api/users?page=0&per_page=${rowPerPage}`)
 			.then((axiosResponse) => {
+				console.log("🚀 ~ file: Home.page.tsx ~ line 28 ~ .then ~ axiosResponse", axiosResponse);
 				const {
-					data: { data }
+					data: { data, page, per_page, total, total_pages }
 				} = axiosResponse;
 				console.log("response", data);
 				const mappedUserData = data.map((userData: any) => {
@@ -33,10 +35,15 @@ const HomePage = () => {
 					return rest;
 				});
 				setUser(mappedUserData);
+				setPaginationInfo({ page, perPage: per_page, total, totalPages: total_pages });
 			})
 			.catch((error) => console.error("API error", error));
 	};
-	return user ? <EnhancedTable headCells={headCells} rowFromProps={user} rowPerPageChanged={rowPerPageChanged} /> : <CircularIndeterminate />;
+	return user ? (
+		<EnhancedTable title="Users" headCells={headCells} rowFromProps={user} rowPerPageChanged={rowPerPageChanged} paginationInfo={paginationInfo} />
+	) : (
+		<CircularIndeterminate />
+	);
 };
 
 export default HomePage;

@@ -5,4 +5,10 @@ export namespace MaterialTable {
 		disablePadding: boolean;
 		label: string;
 	}
+	export interface PaginationInfo {
+		page: number;
+		perPage: number;
+		total: number;
+		totalPages: number;
+	}
 }
