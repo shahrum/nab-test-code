@@ -12,8 +12,17 @@ const headCells: MaterialTable.HeadCells[] = [
 const HomePage = () => {
 	const [user, setUser] = useState(null);
 	useEffect(() => {
+		getUsers();
+	}, []);
+
+	const rowPerPageChanged = (row: number) => {
+		console.log("row", row);
+		getUsers(row);
+	};
+
+	const getUsers = (rowPerPage = 5) => {
 		axios
-			.get("/api/users?page=2")
+			.get(`/api/users?page=0&per_page=${rowPerPage}`)
 			.then((axiosResponse) => {
 				const {
 					data: { data }
@@ -26,8 +35,8 @@ const HomePage = () => {
 				setUser(mappedUserData);
 			})
 			.catch((error) => console.error("API error", error));
-	}, []);
-	return user ? <EnhancedTable headCells={headCells} rowFromProps={user} /> : <CircularIndeterminate />;
+	};
+	return user ? <EnhancedTable headCells={headCells} rowFromProps={user} rowPerPageChanged={rowPerPageChanged} /> : <CircularIndeterminate />;
 };
 
 export default HomePage;

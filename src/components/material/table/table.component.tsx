@@ -13,6 +13,7 @@ import Toolbar from "@material-ui/core/Toolbar";
 import Typography from "@material-ui/core/Typography";
 import Paper from "@material-ui/core/Paper";
 import { descendingComparator, getComparator, stableSort, useStyles, useToolbarStyles } from "../helper/table.helper";
+import SimpleSelect from "../select/select.component";
 // import { lighten, makeStyles } from "@material-ui/core/styles";
 // import IconButton from "@material-ui/core/IconButton";
 // import Tooltip from "@material-ui/core/Tooltip";
@@ -80,7 +81,7 @@ EnhancedTableToolbar.propTypes = {
 };
 
 const EnhancedTable = (props: any) => {
-	const { headCells, rowFromProps } = props;
+	const { headCells, rowFromProps, rowPerPageChanged } = props;
 	const classes = useStyles();
 	const [order, setOrder] = React.useState("asc");
 	const [orderBy, setOrderBy] = React.useState("calories");
@@ -182,6 +183,7 @@ const EnhancedTable = (props: any) => {
 						</TableBody>
 					</Table>
 				</TableContainer>
+				<SimpleSelect fieldName="Rows per page" selectOptions={[5, 10, 15]} defaultOption={5} width={150} onSelectValueChanged={rowPerPageChanged} />
 				<TablePagination
 					rowsPerPageOptions={[5, 10, 25]}
 					component="div"
