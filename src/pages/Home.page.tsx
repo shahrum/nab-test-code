@@ -39,6 +39,13 @@ const HomePage = () => {
 		};
 		console.log("row per page effect:", rowPerPageOnApi);
 		getUsers();
+		return () => {
+			console.log("Clean-up goes here, as eg remove subscibers");
+			// if (subscriber) {
+			// 	subscriber.remover();
+			// 	subscriber = null;
+			// }
+		};
 	}, [rowPerPageOnApi, pageNumber]);
 
 	const onRowPerPageChanged = (row: number): void => {
